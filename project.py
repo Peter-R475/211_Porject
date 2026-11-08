@@ -1,3 +1,26 @@
+class Stack:
+    def __init__(self):
+        self.items = []
+
+    def push(self, x):
+        self.items.append(x)
+
+    def pop(self):
+        if self.is_empty():
+            return None
+        return self.items.pop()
+
+    def peek(self, i):
+        if self.is_empty():
+            return None
+        return self.items[-1]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def get_all(self):
+        return list(reversed(self.items))
+
 class Song:
     def __init__(self, title):
         self.title = title
@@ -9,6 +32,7 @@ class Playlist:
         self.head = None
         self.tail = None
         self.current = None
+        self.history = Stack()
 
     def add(self, title):
         node = Song(title)
@@ -49,6 +73,7 @@ class Playlist:
         else:
             self.current = self.head
         
+        self.history.push(self.current.title)
         return self.current.title
 
     def prev_song(self):
@@ -62,6 +87,7 @@ class Playlist:
         else:
             self.current = self.tail
 
+        self.history.push(self.current.title)
         return self.current.title
 
     def remove(self, title):
@@ -73,11 +99,13 @@ class Playlist:
             return None
 
         if self.current == curr:
-            if curr == self.tail:
-                self.current = self.head if curr != self.head else None
-            else:
+            if curr.next is not None:
                 self.current = curr.next
-
+            elif curr.prev is not None:#
+                self.current = self.head
+            else:
+                self.current = None
+        
         if curr == self.head:
             self.head = curr.next
             if self.head is not None:
@@ -91,12 +119,49 @@ class Playlist:
                 self.tail.next = None
         else:
             curr.next.prev = curr.prev
-
+        
         if self.head is None:
-            self.tail = None
-            self.current = None
+          self.tail = None
+          self.current = None
 
-        return "OK"
+        return "Deleted"
+
+    def Play_history(self):
+        return self.history.get_all()
+
+    def random(self):
+        hst = self.history.items
+        cur = self.head
+        n = 0
+        found = False
+        while cur is not None:
+            if cur.title not in hst:
+                n += 1
+                print(n, ":", cur.title)
+                found = True
+            cur = cur.next
+        if found: 
+            return "Total Played:", n
+        return "Out of items"
+
+    def insert(self, title):
+        node = Song(title)
+        if self.head is None:
+            self.head = node
+            self.tail = node
+            self.current = node
+            return 
+        
+        if self.current.next is None:
+            self.current.next = node
+            node.prev = self.current
+            self.tail = node
+
+        else:
+            node.next = self.current.next
+            node.prev = self.current
+            self.current.next.prev = node
+            self.current.next = node
 
 bucket = Playlist()
 #เพิ่มเพลงเริ่มต้นเอาไว้สำหรับสาธิตการใช้งาน
@@ -104,26 +169,50 @@ bucket.add("Choosin' Texas")
 bucket.add("Housewife")
 bucket.add("Dracula")
 bucket.add("Patient Zero")
-cur = bucket.next_song()
-print("Now playing:", cur, end="\n\n")
+bucket.current = bucket.head
+print("Now playing:", bucket.current.title, end="\n\n")
 
 while True:
-    print("add - เพิ่มเพลง, del - ลบเพลง, prev - เพลงก่อนหน้า, all - เพลงทั้งหมด, next - เพลงถัดไป\n")
+    print("add - เพิ่มเพลง, del - ลบเพลง, prev - เพลงก่อนหน้า, all - เพลงทั้งหมด, next - เพลงถัดไป, history - ประวัติการเล่น, random - สุ่มเพลง, insert - แทรกเพลง\n")
     user_input = str(input("ตัวเลือก: "))
     if user_input == ("add"):
         song = input("โปรดใส่ชื่อเพลง: ")
         bucket.add(song)
         print("Added\n")
-    elif user_input == ("del"):
-        result = bucket.remove(cur)
-    elif user_input == ("all"):
+    if user_input == ("del"):
+        if bucket.current is None:
+            print("Playlist is empty\n")
+            continue
+        titles = bucket.current.title
+        if bucket.current is not None:
+            bucket.remove(titles)
+            if bucket.current is not None:
+                print("Deleted")
+                print("Now playing: ", bucket.current.title, end="\n")
+            else:
+                print("Playlist is empty", end="\n")
+
+    if user_input == ("all"):
         print("Playlist: ")
-        print(bucket.show_all())
-    elif user_input == ("next"):
+        bucket.show_all()
+        print("\n")
+
+    if user_input == ("next"):
         print("Now playing:", bucket.next_song(), end="\n\n")
-    elif user_input == ("prev"):
+
+    if user_input == ("prev"):
         print("Now playing:", bucket.prev_song(), end="\n\n")
-        print("Removed")
-    else:
-        print("โปรดเลือกตัวเลือกที่ถูกต้อง")
+
+    if user_input == ("history"):
+        print("History:", bucket.Play_history(), end="\n\n")
+
+    if user_input == ("random"):
+        print("Result:\n")
+        print(bucket.random(), end="\n\n")
+
+    if user_input == ("insert"):
+        song = input("โปรดใส่ชื่อเพลง: ")
+        bucket.insert(song)
+        print("Inserted\n")
+
     
