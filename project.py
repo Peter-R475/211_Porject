@@ -26,6 +26,7 @@ class Song:
         self.title = title
         self.prev = None
         self.next = None
+        self.count = 0
 
 class Playlist:
     def __init__(self):
@@ -74,7 +75,8 @@ class Playlist:
             self.current = self.head
         
         self.history.push(self.current.title)
-        return self.current.title
+        self.current.count += 1
+        return self.current.title, self.current.count
 
     def prev_song(self):
         if self.tail is None:
@@ -88,7 +90,8 @@ class Playlist:
             self.current = self.tail
 
         self.history.push(self.current.title)
-        return self.current.title
+        self.current.count += 1
+        return self.current.title, self.current.count
 
     def remove(self, title):
         curr = self.head
@@ -124,6 +127,9 @@ class Playlist:
           self.tail = None
           self.current = None
 
+        if self.current is not None:
+            self.current.count += 1
+
         return "Deleted"
 
     def Play_history(self):
@@ -132,17 +138,24 @@ class Playlist:
     def random(self):
         hst = self.history.items
         cur = self.head
-        n = 0
-        found = False
+        n_hst = []
+
         while cur is not None:
             if cur.title not in hst:
-                n += 1
-                print(n, ":", cur.title)
-                found = True
+                n_hst.append(cur)
             cur = cur.next
-        if found: 
-            return "Total Played:", n
-        return "Out of items"
+        
+        if not n_hst:
+            return None, None
+
+        index = len(self.history.items) % len(n_hst)
+        chosen = n_hst[index]
+
+        self.current = chosen
+        self.current.count += 1
+        self.history.push(self.current.title)
+
+        return self.current.title, self.current.count
 
     def insert(self, title):
         node = Song(title)
@@ -169,8 +182,6 @@ bucket.add("Choosin' Texas")
 bucket.add("Housewife")
 bucket.add("Dracula")
 bucket.add("Patient Zero")
-bucket.current = bucket.head
-print("Now playing:", bucket.current.title, end="\n\n")
 
 while True:
     print("add - เพิ่มเพลง, del - ลบเพลง, prev - เพลงก่อนหน้า, all - เพลงทั้งหมด, next - เพลงถัดไป, history - ประวัติการเล่น, random - สุ่มเพลง, insert - แทรกเพลง\n")
@@ -181,7 +192,7 @@ while True:
         print("Added\n")
     if user_input == ("del"):
         if bucket.current is None:
-            print("Playlist is empty\n")
+            print("Please select your song to delete!\n")
             continue
         titles = bucket.current.title
         if bucket.current is not None:
@@ -198,21 +209,21 @@ while True:
         print("\n")
 
     if user_input == ("next"):
-        print("Now playing:", bucket.next_song(), end="\n\n")
+        title, count = bucket.next_song()
+        print("Now playing:", title, "COUNT:", count, end="\n\n")
 
     if user_input == ("prev"):
-        print("Now playing:", bucket.prev_song(), end="\n\n")
+        title, count = bucket.prev_song()
+        print("Now playing:", title, "COUNT:", count, end="\n\n")
 
     if user_input == ("history"):
         print("History:", bucket.Play_history(), end="\n\n")
 
     if user_input == ("random"):
-        print("Result:\n")
-        print(bucket.random(), end="\n\n")
+        title, count = bucket.random()
+        print("Now playing:", title, "COUNT:", count, end="\n\n")
 
     if user_input == ("insert"):
         song = input("โปรดใส่ชื่อเพลง: ")
         bucket.insert(song)
         print("Inserted\n")
-
-    
