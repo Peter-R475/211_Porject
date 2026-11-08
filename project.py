@@ -5,21 +5,13 @@ class Stack:
     def push(self, x):
         self.items.append(x)
 
-    def pop(self):
-        if self.is_empty():
-            return None
-        return self.items.pop()
-
-    def peek(self, i):
-        if self.is_empty():
-            return None
-        return self.items[-1]
-
     def is_empty(self):
         return len(self.items) == 0
 
     def get_all(self):
-        return list(reversed(self.items))
+        if self.is_empty(): 
+            return None
+        return self.items[::-1]
 
 class Song:
     def __init__(self, title):
@@ -50,15 +42,6 @@ class Playlist:
         while current is not None:
             print(current.title, end=' ')
             current = current.next
-            if current is not None:
-                print('<-> ', end='')
-        print('')
-
-    def show_reverse(self):
-        current = self.tail
-        while current is not None:
-            print(current.title, end=' ')
-            current = current.prev
             if current is not None:
                 print('<-> ', end='')
         print('')
