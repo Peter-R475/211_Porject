@@ -32,30 +32,40 @@ class Playlist:
         if self.head is None:
             self.head = node
             self.tail = node
+            node.next = node
+            node.prev = node
         else:
             node.prev = self.tail
+            node.next = self.head
             self.tail.next = node
+            self.head.prev = node
             self.tail = node
 
     def show_all(self):
-        current = self.head
-        while current is not None:
+        if self.head is None:
+            print('')
+            return
+        if self.current is not None:
+            start = self.current 
+        else:
+            start = self.head
+        current = start
+        while True:
             print(current.title, end=' ')
             current = current.next
-            if current is not None:
-                print('<-> ', end='')
+            if current == start:
+                break
+            print('<-> ', end='')
         print('')
 
     def next_song(self):
         if self.head is None:
-            return None
+            return None, None
 
         if self.current is None:
             self.current = self.head
-        elif self.current.next is not None:
-            self.current = self.current.next
         else:
-            self.current = self.head
+            self.current = self.current.next
         
         self.history.push(self.current.title)
         self.current.count += 1
@@ -63,52 +73,43 @@ class Playlist:
 
     def prev_song(self):
         if self.tail is None:
-            return None
+            return None, None
 
         if self.current is None:
             self.current = self.tail
-        elif self.current.prev is not None:
-            self.current = self.current.prev
         else:
-            self.current = self.tail
+            self.current = self.current.prev
 
         self.history.push(self.current.title)
         self.current.count += 1
         return self.current.title, self.current.count
 
     def remove(self, title):
-        curr = self.head
-        while curr is not None and curr.title != title:
-            curr = curr.next
-
-        if curr is None:
+        if self.head is None:
             return None
 
+        curr = self.head
+        while curr.title != title:
+            curr = curr.next
+            if curr == self.head:
+                return None
+
+        if curr == self.head and curr == self.tail:
+            self.head = None
+            self.tail = None
+            self.current = None
+            return "Deleted"
+
         if self.current == curr:
-            if curr.next is not None:
-                self.current = curr.next
-            elif curr.prev is not None:#
-                self.current = self.head
-            else:
-                self.current = None
-        
+            self.current = curr.next
+
+        curr.prev.next = curr.next
+        curr.next.prev = curr.prev
+
         if curr == self.head:
             self.head = curr.next
-            if self.head is not None:
-                self.head.prev = None
-        else:
-            curr.prev.next = curr.next
-
         if curr == self.tail:
             self.tail = curr.prev
-            if self.tail is not None:
-                self.tail.next = None
-        else:
-            curr.next.prev = curr.prev
-        
-        if self.head is None:
-          self.tail = None
-          self.current = None
 
         if self.current is not None:
             self.current.count += 1
@@ -119,15 +120,20 @@ class Playlist:
         return self.history.get_all()
 
     def random(self):
+        if self.head is None:
+            return None, None
+
         hst = self.history.items
         cur = self.head
         n_hst = []
 
-        while cur is not None:
+        while True:
             if cur.title not in hst:
                 n_hst.append(cur)
             cur = cur.next
-        
+            if cur == self.head:
+                break
+
         if not n_hst:
             return None, None
 
@@ -146,18 +152,20 @@ class Playlist:
             self.head = node
             self.tail = node
             self.current = node
-            return 
-        
-        if self.current.next is None:
-            self.current.next = node
-            node.prev = self.current
-            self.tail = node
+            node.next = node
+            node.prev = node
+            return
 
-        else:
-            node.next = self.current.next
-            node.prev = self.current
-            self.current.next.prev = node
-            self.current.next = node
+        if self.current is None:
+            self.current = self.tail
+
+        node.next = self.current.next
+        node.prev = self.current
+        self.current.next.prev = node
+        self.current.next = node
+
+        if self.current == self.tail:
+            self.tail = node
 
 bucket = Playlist()
 #เพิ่มเพลงเริ่มต้นเอาไว้สำหรับสาธิตการใช้งาน
