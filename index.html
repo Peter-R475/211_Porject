@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music Playlist</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Manage songs</h2>
+      <form id="song-form" autocomplete="off">
+        <label for="song-title">Song title</label>
+        <input id="song-title" type="text" />
+        <div class="row">
+          <button type="button" id="btn-add">Add to end</button>
+          <button type="button" id="btn-insert">Insert next</button>
+        </div>
+      </form>
+      <button type="button" id="btn-delete" class="full">🗑️ Delete current song</button>
+    </aside>
+
+    <main class="main">
+      <h1>🎵 Music Playlist</h1>
+
+      <div id="message" class="message" role="status" hidden></div>
+
+      <section class="now">
+        <h2 id="now-title">Now playing: —</h2>
+        <p id="now-sub" class="caption">Press Next, Previous or Random to start.</p>
+      </section>
+
+      <div class="row controls">
+        <button type="button" id="btn-prev">⏮️ Previous</button>
+        <button type="button" id="btn-next">⏭️ Next</button>
+        <button type="button" id="btn-random">🔀 Random</button>
+      </div>
+
+      <hr />
+
+      <div class="columns">
+        <section>
+          <h2>Playlist</h2>
+          <p id="playlist-empty" class="info" hidden>Playlist is empty. Add a song from the sidebar.</p>
+          <ul id="playlist" class="list"></ul>
+        </section>
+        <section>
+          <h2>Play history</h2>
+          <p id="history-empty" class="info" hidden>Nothing played yet.</p>
+          <ul id="history" class="list"></ul>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
