@@ -46,19 +46,13 @@ class Playlist:
     def show_all(self):
         if self.head is None:
             return []
-        if self.current is not None:
-            start = self.current 
-        else:
-            start = self.head
-        current = start
+        node = self.head
         songs = []
         while True:
-            # print(current.title, end=' ')
-            songs.append(current.title)
-            current = current.next
-            if current == start:
+            songs.append((node.title, node is self.current))
+            node = node.next
+            if node is self.head:
                 break
-            # print('<-> ', end='')
         return songs
 
     def next_song(self):
@@ -248,21 +242,16 @@ left, right = st.columns(2)
 
 with left:
     st.subheader("Playlist")
-    # Walk from head so the order stays fixed; just put a pointer before the current song
-    node = bucket.head
-    if node is None:
+    songs = bucket.show_all()
+    if not songs:
         st.info("Playlist is empty. Add a song from the sidebar.")
     else:
-        i = 1
-        while True:
-            if node is bucket.current:
-                st.markdown(f"▶️ **{i}. {node.title}**")
-            else:
-                st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{i}. {node.title}")
-            node = node.next
-            i += 1
-            if node is bucket.head:
-                break
+        for i, (title, is_current) in enumerate(songs, 1):
+            icon = "▶️" if is_current else ""
+            st.markdown(
+                f'<span style="display:inline-block;width:1.6em">{icon}</span>{i}. {title}',
+                unsafe_allow_html=True,
+            )
 
 with right:
     st.subheader("Play history")
